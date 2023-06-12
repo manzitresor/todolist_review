@@ -1,5 +1,5 @@
 {
-  "name": "to_do_list",
+  "name": "todolist_review",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -9,14 +9,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/manzitresor/To_Do_List.git"
+    "url": "git+https://github.com/manzitresor/todolist_review.git"
   },
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/manzitresor/To_Do_List/issues"
+    "url": "https://github.com/manzitresor/todolist_review/issues"
   },
-  "homepage": "https://github.com/manzitresor/To_Do_List#readme",
+  "homepage": "https://github.com/manzitresor/todolist_review#readme",
   "devDependencies": {
     "babel-eslint": "^10.1.0",
     "eslint": "^7.32.0",
