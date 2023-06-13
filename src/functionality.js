@@ -46,6 +46,7 @@ function DisplayTask() {
 
     editIcon.addEventListener('click', () => {
       removeButton.style.display = 'block';
+      editIcon.style.display = 'none';
       descriptionInput.disabled = !descriptionInput.disabled;
       if (!descriptionInput.disabled) {
         descriptionInput.focus();
