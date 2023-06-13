@@ -62,14 +62,25 @@ body {
   margin: 9px;
 }
 
-#descr {
+.task-content {
+  width: 100%;
+  display: flex;
+}
+
+.task-description {
   font-size: 18px;
   outline: none;
+  width: 100%;
+  padding: 10px;
   border: none;
 }
 
 .icon-container {
   color: gray;
+}
+
+.selected {
+  background-color: rgb(255, 248, 176);
 }
 
 .completed {
@@ -84,6 +95,7 @@ body {
 }
 
 .remove-button {
+  padding: 10px 0;
   color: rgb(220, 7, 7);
   display: none;
   cursor: pointer;

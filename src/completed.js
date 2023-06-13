@@ -1,5 +1,5 @@
 // app.js
-import { DisplayTask, taskarr } from './functionality.js';
+import { displayTasks, taskArray } from './functionality.js';
 
 const taskContainer = document.querySelector('.task-container');
 const clearComplitedTask = document.querySelector('#clearCompleted');
@@ -14,21 +14,21 @@ taskContainer.addEventListener('change', (event) => {
 });
 
 function updateCompleted(index, completed) {
-  const task = taskarr.find((element) => element.index === index);
+  const task = taskArray.find((element) => element.index === index);
   if (task) {
     task.completed = completed;
-    localStorage.setItem('todotasks', JSON.stringify(taskarr));
+    localStorage.setItem('todotasks', JSON.stringify(taskArray));
   }
 }
 
 clearComplitedTask.addEventListener('click', (event) => {
   event.preventDefault();
-  const updatedTask = taskarr.filter((task) => !task.completed);
-  taskarr.length = 0;
+  const updatedTask = taskArray.filter((task) => !task.completed);
+  taskArray.length = 0;
   updatedTask.forEach((task, index) => {
     task.index = index + 1;
-    taskarr.push(task);
+    taskArray.push(task);
   });
-  localStorage.setItem('todotasks', JSON.stringify(taskarr));
-  DisplayTask();
+  localStorage.setItem('todotasks', JSON.stringify(taskArray));
+  displayTasks();
 });

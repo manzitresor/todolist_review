@@ -23,26 +23,26 @@ taskContainer.addEventListener('change', function (event) {
   updateCompleted(taskIndex, checkbox.checked);
 });
 function updateCompleted(index, completed) {
-  var task = _functionality_js__WEBPACK_IMPORTED_MODULE_0__.taskarr.find(function (element) {
+  var task = _functionality_js__WEBPACK_IMPORTED_MODULE_0__.taskArray.find(function (element) {
     return element.index === index;
   });
   if (task) {
     task.completed = completed;
-    localStorage.setItem('todotasks', JSON.stringify(_functionality_js__WEBPACK_IMPORTED_MODULE_0__.taskarr));
+    localStorage.setItem('todotasks', JSON.stringify(_functionality_js__WEBPACK_IMPORTED_MODULE_0__.taskArray));
   }
 }
 clearComplitedTask.addEventListener('click', function (event) {
   event.preventDefault();
-  var updatedTask = _functionality_js__WEBPACK_IMPORTED_MODULE_0__.taskarr.filter(function (task) {
+  var updatedTask = _functionality_js__WEBPACK_IMPORTED_MODULE_0__.taskArray.filter(function (task) {
     return !task.completed;
   });
-  _functionality_js__WEBPACK_IMPORTED_MODULE_0__.taskarr.length = 0;
+  _functionality_js__WEBPACK_IMPORTED_MODULE_0__.taskArray.length = 0;
   updatedTask.forEach(function (task, index) {
     task.index = index + 1;
-    _functionality_js__WEBPACK_IMPORTED_MODULE_0__.taskarr.push(task);
+    _functionality_js__WEBPACK_IMPORTED_MODULE_0__.taskArray.push(task);
   });
-  localStorage.setItem('todotasks', JSON.stringify(_functionality_js__WEBPACK_IMPORTED_MODULE_0__.taskarr));
-  (0,_functionality_js__WEBPACK_IMPORTED_MODULE_0__.DisplayTask)();
+  localStorage.setItem('todotasks', JSON.stringify(_functionality_js__WEBPACK_IMPORTED_MODULE_0__.taskArray));
+  (0,_functionality_js__WEBPACK_IMPORTED_MODULE_0__.displayTasks)();
 });
 
 /***/ }),
@@ -55,102 +55,135 @@ clearComplitedTask.addEventListener('click', function (event) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   DisplayTask: () => (/* binding */ DisplayTask),
-/* harmony export */   taskarr: () => (/* binding */ taskarr)
+/* harmony export */   displayTasks: () => (/* binding */ displayTasks),
+/* harmony export */   taskArray: () => (/* binding */ taskArray)
 /* harmony export */ });
 /* eslint-disable no-use-before-define */
 var taskContainer = document.querySelector('.task-container');
-var descr = document.querySelector('#addTask');
-function Tasks(index, descr, completed) {
+var addTaskInput = document.querySelector('#addTask');
+function Task(index, description, completed) {
   this.index = index;
-  this.descr = descr;
+  this.description = description;
   this.completed = completed;
 }
-var todotasks = localStorage.getItem('todotasks');
-var taskarr = todotasks ? JSON.parse(todotasks) : [];
-
-// Adding task
-function addtask() {
-  var description = descr.value;
-  var tasks = new Tasks(taskarr.length + 1, description, false);
-  taskarr.push(tasks);
-  localStorage.setItem('todotasks', JSON.stringify(taskarr));
-  descr.value = '';
+var storedTasks = localStorage.getItem('todotasks');
+var taskArray = storedTasks ? JSON.parse(storedTasks) : [];
+function addTask() {
+  var description = addTaskInput.value;
+  var task = new Task(taskArray.length + 1, description, false);
+  taskArray.push(task);
+  localStorage.setItem('todotasks', JSON.stringify(taskArray));
+  addTaskInput.value = '';
 }
-
-// Displaying Tasks
-function DisplayTask() {
+function displayTasks() {
   taskContainer.innerHTML = '';
-  var sortedTasks = taskarr.sort(function (x, y) {
+  var sortedTasks = taskArray.sort(function (x, y) {
     return x.index - y.index;
   });
   sortedTasks.forEach(function (task) {
     var listItem = document.createElement('li');
-    listItem.innerHTML = "\n      <div class=\"container\">\n        <div class='task-content'>\n          <input type=\"checkbox\" id=\"task-".concat(task.index, "\" ").concat(task.completed ? 'checked' : '', ">\n          <input class=\"descr\" value=\"").concat(task.descr, "\" ").concat(task.completed ? 'disabled' : '', ">\n        </div>\n        <div class=\"icon-container\">\n          <i class=\"fas fa-ellipsis-v edit-btn\"></i>\n          <i class=\"fas fa-trash-alt remove-button\" id=\"").concat(task.index, "\"></i>\n        </div>\n      </div>\n      <hr>\n    ");
+    var containerDiv = document.createElement('div');
+    containerDiv.classList.add('container');
+    var taskContentDiv = document.createElement('div');
+    taskContentDiv.classList.add('task-content');
+    var checkbox = document.createElement('input');
+    checkbox.type = 'checkbox';
+    checkbox.id = "task-".concat(task.index);
+    checkbox.checked = task.completed;
+    var descriptionInput = document.createElement('input');
+    descriptionInput.type = 'text';
+    descriptionInput.value = task.description;
+    descriptionInput.disabled = task.completed;
+    descriptionInput.classList.add('task-description');
+    var iconContainerDiv = document.createElement('div');
+    iconContainerDiv.classList.add('icon-container');
+    var editIcon = document.createElement('i');
+    editIcon.classList.add('fas', 'fa-ellipsis-v', 'edit-btn');
+    var removeButton = document.createElement('i');
+    removeButton.classList.add('fas', 'fa-trash-alt', 'remove-button');
+    removeButton.dataset.index = task.index;
+    listItem.appendChild(containerDiv);
+    containerDiv.appendChild(taskContentDiv);
+    taskContentDiv.appendChild(checkbox);
+    taskContentDiv.appendChild(descriptionInput);
+    containerDiv.appendChild(iconContainerDiv);
+    iconContainerDiv.appendChild(editIcon);
+    iconContainerDiv.appendChild(removeButton);
     taskContainer.appendChild(listItem);
-    var editIcon = listItem.querySelector('.edit-btn');
-    var descriptionInput = listItem.querySelector('.descr');
-    var removeButton = listItem.querySelector('.remove-button');
     editIcon.addEventListener('click', function () {
       removeButton.style.display = 'block';
-      descriptionInput.disabled = !descriptionInput.disabled;
-      if (!descriptionInput.disabled) {
-        descriptionInput.focus();
-      }
+      editIcon.style.display = 'none';
+      descriptionInput.disabled = false;
+      descriptionInput.focus();
+      descriptionInput.classList.toggle('selected');
     });
-    descriptionInput.addEventListener('keydown', function (event) {
-      if (event.key === 'Enter') {
-        event.preventDefault();
+    descriptionInput.addEventListener('focus', function () {
+      removeButton.style.display = 'block';
+      editIcon.style.display = 'none';
+      descriptionInput.disabled = false;
+      descriptionInput.focus();
+      descriptionInput.classList.toggle('selected');
+    });
+    descriptionInput.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter' && descriptionInput.value !== '') {
+        var taskIndex = parseInt(removeButton.dataset.index, 10);
+        updateTask(taskIndex, descriptionInput.value);
+        localStorage.setItem('todotasks', JSON.stringify(taskArray));
         descriptionInput.blur();
       }
     });
     descriptionInput.addEventListener('blur', function () {
-      var newDescription = descriptionInput.value;
-      var dataIndex = removeButton.getAttribute('id');
-      var taskIndex = parseInt(dataIndex, 10);
-      updateTask(taskIndex, newDescription);
+      removeButton.style.display = 'block';
+      editIcon.style.display = 'none';
+      descriptionInput.disabled = true;
+      var listItem = descriptionInput.closest('li');
+      listItem.classList.remove('selected');
+      descriptionInput.classList.remove('selected');
     });
-    removeButton.addEventListener('click', function () {
-      var dataIndex = removeButton.getAttribute('id');
-      var taskIndex = parseInt(dataIndex, 10);
+    removeButton.addEventListener('click', function (event) {
+      var taskIndex = parseInt(event.target.dataset.index, 10); // Retrieve index from dataset
       deleteTask(taskIndex);
     });
   });
 }
-
-// Remove task
-function deleteTask(index) {
-  var newArr = taskarr.filter(function (element) {
-    return element.index !== index;
+function deleteTaskArray(index) {
+  var deletedTaskIndex = taskArray.findIndex(function (task) {
+    return task.index === index;
   });
-  taskarr.length = 0;
-  newArr.forEach(function (element, i) {
-    element.index = i + 1;
-    taskarr.push(element);
-  });
-  localStorage.setItem('todotasks', JSON.stringify(taskarr));
-  DisplayTask();
-}
-
-// Update task description
-function updateTask(index, newDescription) {
-  var task = taskarr.find(function (element) {
-    return element.index === index;
-  });
-  if (task) {
-    task.descr = newDescription;
-    localStorage.setItem('todotasks', JSON.stringify(taskarr));
-    DisplayTask();
+  if (deletedTaskIndex !== -1) {
+    taskArray.splice(deletedTaskIndex, 1);
+    localStorage.setItem('todotasks', JSON.stringify(taskArray));
   }
 }
-// ADD NEW LIST EVENT
+function deleteTask(index) {
+  var deletedTaskIndex = taskArray.findIndex(function (task) {
+    return task.index === index;
+  });
+  if (deletedTaskIndex !== -1) {
+    deleteTaskArray(index);
+    for (var i = deletedTaskIndex; i < taskArray.length; i += 1) {
+      taskArray[i].index = i + 1;
+    }
+    displayTasks();
+  }
+}
+function updateTask(index, newDescription) {
+  var task = taskArray.find(function (task) {
+    return task.index === index;
+  });
+  if (task) {
+    task.description = newDescription;
+    localStorage.setItem('todotasks', JSON.stringify(taskArray));
+    displayTasks();
+  }
+}
 var formBtn = document.querySelector('.btn');
 formBtn.addEventListener('click', function (event) {
   event.preventDefault();
-  addtask();
-  DisplayTask();
+  addTask();
+  displayTasks();
 });
-DisplayTask();
+displayTasks();
 
 
 /***/ }),
@@ -238,14 +271,25 @@ ___CSS_LOADER_EXPORT___.push([module.id, `body {
   margin: 9px;
 }
 
-.descr {
+.task-content {
+  width: 100%;
+  display: flex;
+}
+
+.task-description {
   font-size: 18px;
   outline: none;
+  width: 100%;
+  padding: 10px;
   border: none;
 }
 
 .icon-container {
   color: gray;
+}
+
+.selected {
+  background-color: rgb(255, 248, 176);
 }
 
 .completed {
@@ -260,6 +304,7 @@ ___CSS_LOADER_EXPORT___.push([module.id, `body {
 }
 
 .remove-button {
+  padding: 10px 0;
   color: rgb(220, 7, 7);
   display: none;
   cursor: pointer;
@@ -267,7 +312,7 @@ ___CSS_LOADER_EXPORT___.push([module.id, `body {
 
 .edit-btn {
   cursor: pointer;
-}`, "",{"version":3,"sources":["webpack://./src/styles.css"],"names":[],"mappings":"AAAA;EACE,oCAAA;AACF;;AAEA;EACE,oCAAA;EACA,UAAA;EACA,eAAA;EACA,0CAAA;AACF;;AAEA;EACE,uBAAA;EACA,aAAA;AACF;;AAEA;EACE,aAAA;EACA,8BAAA;EACA,mBAAA;EACA,iBAAA;AACF;;AAEA;EACE,WAAA;EACA,eAAA;EACA,mBAAA;AACF;;AAEA;EACE,WAAA;EACA,eAAA;AACF;;AAEA;EACE,uBAAA;EACA,aAAA;AACF;;AAEA;EACE,WAAA;EACA,aAAA;EACA,YAAA;EACA,eAAA;EACA,aAAA;AACF;;AAEA;EACE,uBAAA;EACA,YAAA;EACA,eAAA;AACF;;AAEA;EACE,gBAAA;AACF;;AAEA;EACE,gBAAA;EACA,aAAA;EACA,8BAAA;EACA,WAAA;AACF;;AAEA;EACE,eAAA;EACA,aAAA;EACA,YAAA;AACF;;AAEA;EACE,WAAA;AACF;;AAEA;EACE,oCAAA;EACA,kBAAA;EACA,eAAA;EACA,YAAA;AACF;;AAEA;EACE,eAAA;AACF;;AAEA;EACE,qBAAA;EACA,aAAA;EACA,eAAA;AACF;;AAEA;EACE,eAAA;AACF","sourcesContent":["body {\r\n  background-color: rgb(233, 230, 230);\r\n}\r\n\r\n.main-section {\r\n  background-color: rgb(233, 230, 230);\r\n  width: 70%;\r\n  margin: 10% 20%;\r\n  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);\r\n}\r\n\r\n.todo-container {\r\n  background-color: white;\r\n  padding: 10px;\r\n}\r\n\r\n.heading-container {\r\n  display: flex;\r\n  justify-content: space-between;\r\n  align-items: center;\r\n  margin: auto 10px;\r\n}\r\n\r\n.heading {\r\n  color: gray;\r\n  font-size: 30px;\r\n  letter-spacing: 8px;\r\n}\r\n\r\n#loading {\r\n  color: gray;\r\n  cursor: pointer;\r\n}\r\n\r\n#add-list-form {\r\n  background-color: white;\r\n  display: flex;\r\n}\r\n\r\n#add-list-form input {\r\n  width: 100%;\r\n  padding: 10px;\r\n  border: none;\r\n  font-size: 18px;\r\n  outline: none;\r\n}\r\n\r\n.btn {\r\n  background-color: white;\r\n  border: none;\r\n  cursor: pointer;\r\n}\r\n\r\n.task-container li {\r\n  list-style: none;\r\n}\r\n\r\n.container {\r\n  list-style: none;\r\n  display: flex;\r\n  justify-content: space-between;\r\n  margin: 9px;\r\n}\r\n\r\n.descr {\r\n  font-size: 18px;\r\n  outline: none;\r\n  border: none;\r\n}\r\n\r\n.icon-container {\r\n  color: gray;\r\n}\r\n\r\n.completed {\r\n  background-color: rgb(233, 230, 230);\r\n  text-align: center;\r\n  font-size: 20px;\r\n  padding: 5px;\r\n}\r\n\r\n.clear {\r\n  cursor: pointer;\r\n}\r\n\r\n.remove-button {\r\n  color: rgb(220, 7, 7);\r\n  display: none;\r\n  cursor: pointer;\r\n}\r\n\r\n.edit-btn {\r\n  cursor: pointer;\r\n}\r\n"],"sourceRoot":""}]);
+}`, "",{"version":3,"sources":["webpack://./src/styles.css"],"names":[],"mappings":"AAAA;EACE,oCAAA;AACF;;AAEA;EACE,oCAAA;EACA,UAAA;EACA,eAAA;EACA,0CAAA;AACF;;AAEA;EACE,uBAAA;EACA,aAAA;AACF;;AAEA;EACE,aAAA;EACA,8BAAA;EACA,mBAAA;EACA,iBAAA;AACF;;AAEA;EACE,WAAA;EACA,eAAA;EACA,mBAAA;AACF;;AAEA;EACE,WAAA;EACA,eAAA;AACF;;AAEA;EACE,uBAAA;EACA,aAAA;AACF;;AAEA;EACE,WAAA;EACA,aAAA;EACA,YAAA;EACA,eAAA;EACA,aAAA;AACF;;AAEA;EACE,uBAAA;EACA,YAAA;EACA,eAAA;AACF;;AAEA;EACE,gBAAA;AACF;;AAEA;EACE,gBAAA;EACA,aAAA;EACA,8BAAA;EACA,WAAA;AACF;;AAEA;EACE,WAAA;EACA,aAAA;AACF;;AAEA;EACE,eAAA;EACA,aAAA;EACA,WAAA;EACA,aAAA;EACA,YAAA;AACF;;AAEA;EACE,WAAA;AACF;;AAEA;EACE,oCAAA;AACF;;AAEA;EACE,oCAAA;EACA,kBAAA;EACA,eAAA;EACA,YAAA;AACF;;AAEA;EACE,eAAA;AACF;;AAEA;EACE,eAAA;EACA,qBAAA;EACA,aAAA;EACA,eAAA;AACF;;AAEA;EACE,eAAA;AACF","sourcesContent":["body {\r\n  background-color: rgb(233, 230, 230);\r\n}\r\n\r\n.main-section {\r\n  background-color: rgb(233, 230, 230);\r\n  width: 70%;\r\n  margin: 10% 20%;\r\n  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);\r\n}\r\n\r\n.todo-container {\r\n  background-color: white;\r\n  padding: 10px;\r\n}\r\n\r\n.heading-container {\r\n  display: flex;\r\n  justify-content: space-between;\r\n  align-items: center;\r\n  margin: auto 10px;\r\n}\r\n\r\n.heading {\r\n  color: gray;\r\n  font-size: 30px;\r\n  letter-spacing: 8px;\r\n}\r\n\r\n#loading {\r\n  color: gray;\r\n  cursor: pointer;\r\n}\r\n\r\n#add-list-form {\r\n  background-color: white;\r\n  display: flex;\r\n}\r\n\r\n#add-list-form input {\r\n  width: 100%;\r\n  padding: 10px;\r\n  border: none;\r\n  font-size: 18px;\r\n  outline: none;\r\n}\r\n\r\n.btn {\r\n  background-color: white;\r\n  border: none;\r\n  cursor: pointer;\r\n}\r\n\r\n.task-container li {\r\n  list-style: none;\r\n}\r\n\r\n.container {\r\n  list-style: none;\r\n  display: flex;\r\n  justify-content: space-between;\r\n  margin: 9px;\r\n}\r\n\r\n.task-content {\r\n  width: 100%;\r\n  display: flex;\r\n}\r\n\r\n.task-description {\r\n  font-size: 18px;\r\n  outline: none;\r\n  width: 100%;\r\n  padding: 10px;\r\n  border: none;\r\n}\r\n\r\n.icon-container {\r\n  color: gray;\r\n}\r\n\r\n.selected {\r\n  background-color: rgb(255, 248, 176);\r\n}\r\n\r\n.completed {\r\n  background-color: rgb(233, 230, 230);\r\n  text-align: center;\r\n  font-size: 20px;\r\n  padding: 5px;\r\n}\r\n\r\n.clear {\r\n  cursor: pointer;\r\n}\r\n\r\n.remove-button {\r\n  padding: 10px 0;\r\n  color: rgb(220, 7, 7);\r\n  display: none;\r\n  cursor: pointer;\r\n}\r\n\r\n.edit-btn {\r\n  cursor: pointer;\r\n}\r\n"],"sourceRoot":""}]);
 // Exports
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
 
@@ -806,4 +851,4 @@ _completed_js__WEBPACK_IMPORTED_MODULE_2__();
 
 /******/ })()
 ;
-//# sourceMappingURL=bundlea5ee66cea8f5f79c9b3d.js.map
+//# sourceMappingURL=bundle64865cb16e1d72c5ffff.js.map

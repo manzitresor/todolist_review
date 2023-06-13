@@ -1,110 +1,144 @@
 /* eslint-disable no-use-before-define */
 const taskContainer = document.querySelector('.task-container');
-const descr = document.querySelector('#addTask');
+const addTaskInput = document.querySelector('#addTask');
 
-function Tasks(index, descr, completed) {
+function Task(index, description, completed) {
   this.index = index;
-  this.descr = descr;
+  this.description = description;
   this.completed = completed;
 }
 
-const todotasks = localStorage.getItem('todotasks');
-const taskarr = todotasks ? JSON.parse(todotasks) : [];
+const storedTasks = localStorage.getItem('todotasks');
+const taskArray = storedTasks ? JSON.parse(storedTasks) : [];
 
-// Adding task
-function addtask() {
-  const description = descr.value;
-  const tasks = new Tasks(taskarr.length + 1, description, false);
-  taskarr.push(tasks);
-  localStorage.setItem('todotasks', JSON.stringify(taskarr));
-  descr.value = '';
+function addTask() {
+  const description = addTaskInput.value;
+  const task = new Task(taskArray.length + 1, description, false);
+  taskArray.push(task);
+  localStorage.setItem('todotasks', JSON.stringify(taskArray));
+  addTaskInput.value = '';
 }
 
-// Displaying Tasks
-function DisplayTask() {
+function displayTasks() {
   taskContainer.innerHTML = '';
-  const sortedTasks = taskarr.sort((x, y) => x.index - y.index);
+  const sortedTasks = taskArray.sort((x, y) => x.index - y.index);
   sortedTasks.forEach((task) => {
     const listItem = document.createElement('li');
-    listItem.innerHTML = `
-      <div class="container">
-        <div class='task-content'>
-          <input type="checkbox" id="task-${task.index}" ${task.completed ? 'checked' : ''}>
-          <input id="descr" value="${task.descr}" ${task.completed ? '!disabled' : ''}>
-        </div>
-        <div class="icon-container">
-          <i class="fas fa-ellipsis-v edit-btn"></i>
-          <i class="fas fa-trash-alt remove-button" id="${task.index}"></i>
-        </div>
-      </div>
-      <hr>
-    `;
+
+    const containerDiv = document.createElement('div');
+    containerDiv.classList.add('container');
+
+    const taskContentDiv = document.createElement('div');
+    taskContentDiv.classList.add('task-content');
+
+    const checkbox = document.createElement('input');
+    checkbox.type = 'checkbox';
+    checkbox.id = `task-${task.index}`;
+    checkbox.checked = task.completed;
+
+    const descriptionInput = document.createElement('input');
+    descriptionInput.type = 'text';
+    descriptionInput.value = task.description;
+    descriptionInput.disabled = task.completed;
+    descriptionInput.classList.add('task-description');
+
+    const iconContainerDiv = document.createElement('div');
+    iconContainerDiv.classList.add('icon-container');
+
+    const editIcon = document.createElement('i');
+    editIcon.classList.add('fas', 'fa-ellipsis-v', 'edit-btn');
+
+    const removeButton = document.createElement('i');
+    removeButton.classList.add('fas', 'fa-trash-alt', 'remove-button');
+    removeButton.dataset.index = task.index;
+
+    listItem.appendChild(containerDiv);
+    containerDiv.appendChild(taskContentDiv);
+    taskContentDiv.appendChild(checkbox);
+    taskContentDiv.appendChild(descriptionInput);
+    containerDiv.appendChild(iconContainerDiv);
+    iconContainerDiv.appendChild(editIcon);
+    iconContainerDiv.appendChild(removeButton);
+
     taskContainer.appendChild(listItem);
-    const editIcon = listItem.querySelector('.edit-btn');
-    const descriptionInput = listItem.querySelector('#descr');
-    const removeButton = listItem.querySelector('.remove-button');
 
     editIcon.addEventListener('click', () => {
       removeButton.style.display = 'block';
       editIcon.style.display = 'none';
-      descriptionInput.disabled = !descriptionInput.disabled;
-      if (!descriptionInput.disabled) {
-        descriptionInput.focus();
-      }
+      descriptionInput.disabled = false;
+      descriptionInput.focus();
+      descriptionInput.classList.toggle('selected');
     });
 
-    descriptionInput.addEventListener('keydown', (event) => {
-      if (event.key === 'Enter') {
-        event.preventDefault();
+    descriptionInput.addEventListener('focus', () => {
+      removeButton.style.display = 'block';
+      editIcon.style.display = 'none';
+      descriptionInput.disabled = false;
+      descriptionInput.focus();
+      descriptionInput.classList.toggle('selected');
+    });
+
+    descriptionInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && descriptionInput.value !== '') {
+        const taskIndex = parseInt(removeButton.dataset.index, 10);
+        updateTask(taskIndex, descriptionInput.value);
+        localStorage.setItem('todotasks', JSON.stringify(taskArray));
         descriptionInput.blur();
       }
     });
 
     descriptionInput.addEventListener('blur', () => {
-      const newDescription = descriptionInput.value;
-      const dataIndex = removeButton.getAttribute('id');
-      const taskIndex = parseInt(dataIndex, 10);
-      updateTask(taskIndex, newDescription);
+      removeButton.style.display = 'block';
+      editIcon.style.display = 'none';
+      descriptionInput.disabled = true;
+      const listItem = descriptionInput.closest('li');
+      listItem.classList.remove('selected');
+      descriptionInput.classList.remove('selected');
     });
 
-    removeButton.addEventListener('click', () => {
-      const dataIndex = removeButton.getAttribute('id');
-      const taskIndex = parseInt(dataIndex, 10);
+    removeButton.addEventListener('click', (event) => {
+      const taskIndex = parseInt(event.target.dataset.index, 10); // Retrieve index from dataset
       deleteTask(taskIndex);
     });
   });
 }
 
-// Remove task
-function deleteTask(index) {
-  const newArr = taskarr.filter((element) => element.index !== index);
-  taskarr.length = 0;
-  newArr.forEach((element, i) => {
-    element.index = i + 1;
-    taskarr.push(element);
-  });
-  localStorage.setItem('todotasks', JSON.stringify(taskarr));
-  DisplayTask();
-}
-
-// Update task description
-function updateTask(index, newDescription) {
-  const task = taskarr.find((element) => element.index === index);
-  if (task) {
-    task.descr = newDescription;
-    localStorage.setItem('todotasks', JSON.stringify(taskarr));
-    DisplayTask();
+function deleteTaskArray(index) {
+  const deletedTaskIndex = taskArray.findIndex((task) => task.index === index);
+  if (deletedTaskIndex !== -1) {
+    taskArray.splice(deletedTaskIndex, 1);
+    localStorage.setItem('todotasks', JSON.stringify(taskArray));
   }
 }
-// ADD NEW LIST EVENT
+
+function deleteTask(index) {
+  const deletedTaskIndex = taskArray.findIndex((task) => task.index === index);
+  if (deletedTaskIndex !== -1) {
+    deleteTaskArray(index);
+    for (let i = deletedTaskIndex; i < taskArray.length; i += 1) {
+      taskArray[i].index = i + 1;
+    }
+    displayTasks();
+  }
+}
+
+function updateTask(index, newDescription) {
+  const task = taskArray.find((task) => task.index === index);
+  if (task) {
+    task.description = newDescription;
+    localStorage.setItem('todotasks', JSON.stringify(taskArray));
+    displayTasks();
+  }
+}
+
 const formBtn = document.querySelector('.btn');
 
 formBtn.addEventListener('click', (event) => {
   event.preventDefault();
-  addtask();
-  DisplayTask();
+  addTask();
+  displayTasks();
 });
 
-DisplayTask();
+displayTasks();
 
-export { DisplayTask, taskarr };
+export { displayTasks, taskArray };
