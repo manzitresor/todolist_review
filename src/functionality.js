@@ -30,7 +30,7 @@ function DisplayTask() {
       <div class="container">
         <div class='task-content'>
           <input type="checkbox" id="task-${task.index}" ${task.completed ? 'checked' : ''}>
-          <input class="descr" value="${task.descr}" ${task.completed ? 'disabled' : ''}>
+          <input id="descr" value="${task.descr}" ${task.completed ? '!disabled' : ''}>
         </div>
         <div class="icon-container">
           <i class="fas fa-ellipsis-v edit-btn"></i>
@@ -41,7 +41,7 @@ function DisplayTask() {
     `;
     taskContainer.appendChild(listItem);
     const editIcon = listItem.querySelector('.edit-btn');
-    const descriptionInput = listItem.querySelector('.descr');
+    const descriptionInput = listItem.querySelector('#descr');
     const removeButton = listItem.querySelector('.remove-button');
 
     editIcon.addEventListener('click', () => {

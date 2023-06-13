@@ -62,7 +62,7 @@ body {
   margin: 9px;
 }
 
-.descr {
+#descr {
   font-size: 18px;
   outline: none;
   border: none;
